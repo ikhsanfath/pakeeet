@@ -2,11 +2,10 @@
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Kurir Kota</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#1E2A44;--aspal:#3B4252;--kuning:#FFC83D;--tosca:#19B5A5;--merah:#F2545B;--kertas:#FFFAF0}
 *{box-sizing:border-box;touch-action:none;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);font-family:'Baloo 2',system-ui,sans-serif;color:var(--ink)}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:600;color:var(--ink)}
 canvas{position:fixed;inset:0;width:100%;height:100%}
 .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(30,42,68,.82);overflow:auto;touch-action:pan-y}
 .screen.on{display:flex}
@@ -39,8 +38,8 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:5px 4px;t
 <div id="bubble"></div>
 
 <div class="screen on" id="sLogin"><div class="card">
-<h1>Kurir Kota 🛵</h1><p>Antar surat, makanan, dan barang keliling kota secepat mungkin. Masuk pakai email saja, tanpa password.</p>
-<label for="em">Email</label><input type="email" id="em" placeholder="nama@email.com" autocomplete="email">
+<h1>Kurir Kota 🛵</h1><p>Antar surat, makanan, dan barang keliling kota secepat mungkin. Buat username untuk menyimpan progres. Tanpa email, tanpa password.</p>
+<label for="em">Username (3-14 huruf kecil, angka, atau _)</label><input type="text" id="em" maxlength="14" placeholder="contoh: budi_kurir" autocomplete="username" autocapitalize="none">
 <button class="btn" id="bLogin">Masuk &amp; mulai</button>
 <p class="small" id="mode"></p></div></div>
 
@@ -76,8 +75,8 @@ table{width:100%;border-collapse:collapse;font-size:15px}td,th{padding:5px 4px;t
 /* ===== KONFIGURASI ONLINE (opsional) =====
  Isi dengan data Supabase (lihat README.md). Kalau kosong, game jalan dalam mode lokal
  (simpan & leaderboard hanya di perangkat ini). */
-const SB_URL = "https://mmgagngbllcnehtsfzbm.supabase.co"; // contoh: https://abcd.supabase.co
-const SB_KEY = "sb_publishable_u49pk1mCaNdTjLd-z4CcMQ_8oGNo9qH"; // anon public key
+const SB_URL = ""; // contoh: https://abcd.supabase.co
+const SB_KEY = ""; // anon public key
 /* ========================================= */
 
 const $=id=>document.getElementById(id), ONLINE=!!(SB_URL&&SB_KEY);
@@ -125,8 +124,8 @@ function paint(){['gen','hat','jobs','skin','hair','jkt'].forEach(i=>$(i).refres
  const L=$('lvs');L.innerHTML='';LV.forEach((l,i)=>{const b=document.createElement('button');b.className='chip'+(i+1>P.maxLevel?' lock':'')+(i+1==(P.lv||1)?' sel':'');b.innerHTML=(i+1>P.maxLevel?'🔒':i+1)+'<br><span class="small">'+l.t+'</span>';b.onclick=()=>{P.lv=i+1;paint()};L.appendChild(b)});
  const c=$('prev').getContext('2d');c.fillStyle='#9ad7c7';c.fillRect(0,0,130,130);c.save();c.translate(65,65);c.scale(2.2,2.2);drawRider(c,P,0);c.restore()}
 $('mode').textContent=ONLINE?'Progres & leaderboard tersimpan online.':'Mode lokal: progres & leaderboard hanya di perangkat ini.';
-$('bLogin').onclick=async()=>{const e=$('em').value.trim().toLowerCase();if(!/^\S+@\S+\.\S+$/.test(e)){$('em').style.borderColor='#F2545B';$('em').focus();return}
- $('bLogin').textContent='Memuat…';const p=await loadPlayer(e);P=p||{...P0,jobs:['surat'],email:e,name:e.split('@')[0].slice(0,14)};P.email=e;P.lv=Math.min(P.lv||1,P.maxLevel);
+$('bLogin').onclick=async()=>{const e=$('em').value.trim().toLowerCase();if(!/^[a-z0-9_]{3,14}$/.test(e)){$('em').style.borderColor='#F2545B';$('em').focus();return}
+ $('bLogin').textContent='Memuat…';const p=await loadPlayer(e);P=p||{...P0,jobs:['surat'],email:e,name:e};P.email=e;P.lv=Math.min(P.lv||1,P.maxLevel);
  $('bLogin').textContent='Masuk & mulai';await saveProfile();$('nm').value=P.name;paint();show('sMenu')};
 $('nm').oninput=e=>P.name=e.target.value.slice(0,14)||'Kurir';
 $('bOut').onclick=()=>{lsSet('kk_last','');show('sLogin')};
@@ -142,7 +141,7 @@ $('rMenu').onclick=()=>{paint();show('sMenu')};$('rAgain').onclick=()=>start(G.l
 /* ---------- karakter ---------- */
 function drawRider(c,p,ang){c.save();c.rotate(ang);
  c.fillStyle='#222';c.beginPath();c.roundRect(-20,-6,40,12,6);c.fill();
- c.fillStyle='#444';c.fillRect(14,-9,5,18);c.fillStyle='var(--x)';
+ c.fillStyle='#444';c.fillRect(14,-9,5,18);
  c.fillStyle=p.jacket;c.beginPath();c.ellipse(-2,0,9,12,0,0,7);c.fill();
  c.fillStyle=p.skin;c.beginPath();c.arc(-2,-13,3.2,0,7);c.arc(-2,13,3.2,0,7);c.fill();
  c.fillStyle='#e8a317';c.fillRect(-12,-8,8,16);c.strokeStyle='#0003';c.strokeRect(-12,-8,8,16);
@@ -156,8 +155,8 @@ function drawRider(c,p,ang){c.save();c.rotate(ang);
 
 /* ---------- game ---------- */
 const cv=$('c'),ctx=cv.getContext('2d');let W,H;
-function resize(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
-addEventListener('resize',resize);resize();
+function resize(){const d=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',()=>{resize();render()});resize();
 const solid=(x,y)=>x<0||y<0||x>=MW||y>=MH||!isRoad(x,y);
 const center=(x,y)=>({x:x*T+T/2,y:y*T+T/2});
 function randStop(avoid){for(let k=0;k<200;k++){const x=1+Math.random()*(MW-2)|0,y=1+Math.random()*(MH-2)|0;if(!isRoad(x,y)||(x%6==3&&y%5==2))continue;const p=center(x,y);if(!avoid||Math.hypot(p.x-avoid.x,p.y-avoid.y)>T*8)return p}return center(9,7)}
@@ -165,7 +164,7 @@ function start(lvl){if(lvl>LV.length)lvl=LV.length;P.lv=lvl;const n=LV[lvl-1].n,
  for(let i=0;i<n;i++){const a=randStop(prev),b=randStop(a);q.push({type:P.jobs[Math.random()*P.jobs.length|0],a,b});prev=b}
  const cars=[];for(let i=0;i<(lvl-1)*3;i++){const ry=2+5*(Math.random()*4|0);cars.push({x:Math.random()*MW*T,y:(ry+(i%2?.7:.3))*T,v:(i%2?-1:1)*(70+lvl*15),c:['#F2545B','#6C5CE7','#e8e8e8','#FFC83D'][i%4]})}
  const s=center(3,2);G={lvl,q,i:0,stage:0,x:s.x,y:s.y,ang:0,vx:0,vy:0,t:0,stun:0,cars,done:false,bub:0};
- show(null);say(0);}
+ show(null);say(0);kick();}
 function say(kind){const d=G.q[G.i],L=TXT[d.type][kind?'b':'a'];$('bubble').innerHTML=JOBS[d.type][0]+' '+L[Math.random()*L.length|0].replace('@','Kak '+esc(P.name));$('bubble').style.display='block';G.bub=3.2}
 function dir(){let dx=(keys.ArrowRight||keys.d?1:0)-(keys.ArrowLeft||keys.a?1:0),dy=(keys.ArrowDown||keys.s?1:0)-(keys.ArrowUp||keys.w?1:0);
  if(stick){dx=stick.dx;dy=stick.dy}return[dx,dy]}
@@ -187,12 +186,34 @@ function step(dt){if(!G||G.done)return;G.t+=dt;if(G.bub>0&&(G.bub-=dt)<=0)$('bub
    if(G.i>=G.q.length){finish();return}setTimeout(()=>{if(G&&!G.done)say(0)},1800)}}
  $('hT').textContent=fmt(G.t*1000);$('hD').textContent=(G.stage?'Antar ':'Ambil ')+JOBS[d.type][0]+' '+(G.i+1)+'/'+G.q.length;$('hL').textContent='Lv '+G.lvl}
 async function finish(){G.done=true;$('bubble').style.display='none';const ms=Math.round(G.t*1000),lv=G.lvl;
+ if(lv==P.maxLevel&&lv<LV.length)P.maxLevel=lv+1;
+ $('rT').textContent='Level '+lv+' selesai! 🎉';$('rP').innerHTML=`Waktu <b>${fmt(ms)}</b> untuk ${G.q.length} antaran. <span id="rk">Menghitung peringkat…</span>`;
+ $('rNext').style.display=lv<LV.length?'block':'none';show('sResult');
+ await Promise.all([addScore(lv,ms),saveProfile()]);const best=(await getBoard(lv))||[];
+ $('rk').innerHTML='Peringkat kamu: <b>#'+(best.filter(b=>b.time_ms<ms&&b.email!=P.email).length+1)+'</b>.'}
+
+let _m;function mapCv(){if(_m)return _m;_m=document.createElement('canvas');_m.width=MW*T;_m.height=MH*T;const c=_m.getContext('2d'),HU=[['#F2A65A','#c9843c'],['#E6E2D3','#bdb8a4'],['#7FB7BE','#5c9199'],['#E76F51','#b8523a'],['#8E7DBE','#6c5c9a']];
+for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const px=x*T,py=y*T;
+ if(isRoad(x,y)){c.fillStyle='#3B4252';c.fillRect(px,py,T,T);c.fillStyle='#FFC83D';
+  if(y%5==2&&x%6!=3)c.fillRect(px+6,py+T/2-1.5,T/2-12,3);
+  if(x%6==3&&y%5!=2)c.fillRect(px+T/2-1.5,py+6,3,T/2-12)}
+ else{const h=HU[((x*7+y*13)>>1)%5];c.fillStyle=h[1];c.fillRect(px,py,T,T);c.fillStyle=h[0];c.fillRect(px+2,py+2,T-4,T-10);c.fillStyle='#0002';c.fillRect(px+10,py+10,8,8);c.fillRect(px+T-20,py+10,8,8)}}
+return _m}
+function render(){ctx.fillStyle='#9ad7c7';ctx.fillRect(0,0,W,H);if(!G)return;
+ const cx=Math.max(0,Math.min(MW*T-W,G.x-W/2)),cy=Math.max(0,Math.min(MH*T-H,G.y-H/2));ctx.save();ctx.translate(-cx|0,-cy|0);
+ ctx.drawImage(mapCv(),0,0);
+ for(const c of G.cars){c.x+=c.v*dt;if(c.x>MW*T+50)c.x=-50;if(c.x<-50)c.x=MW*T+50;if(!G.stun&&Math.abs(c.x-G.x)<34&&Math.abs(c.y-G.y)<20){G.stun=.8;G.vx*=-.5;G.vy*=-.5}}
+ const d=G.q[G.i],tg=G.stage?d.b:d.a;
+ if(Math.hypot(tg.x-G.x,tg.y-G.y)<38){if(!G.stage){G.stage=1;say(0);$('bubble').innerHTML+=''}else{say(1);G.i++;G.stage=0;
+   if(G.i>=G.q.length){finish();return}setTimeout(()=>{if(G&&!G.done)say(0)},1800)}}
+ $('hT').textContent=fmt(G.t*1000);$('hD').textContent=(G.stage?'Antar ':'Ambil ')+JOBS[d.type][0]+' '+(G.i+1)+'/'+G.q.length;$('hL').textContent='Lv '+G.lvl}
+async function finish(){G.done=true;$('bubble').style.display='none';const ms=Math.round(G.t*1000),lv=G.lvl;
  const best=(await getBoard(lv))||[];const rank=best.filter(b=>b.time_ms<ms&&b.email!=P.email).length+1;
  if(lv==P.maxLevel&&lv<LV.length)P.maxLevel=lv+1;await Promise.all([addScore(lv,ms),saveProfile()]);
  $('rT').textContent='Level '+lv+' selesai! 🎉';$('rP').innerHTML=`Waktu <b>${fmt(ms)}</b> untuk ${G.q.length} antaran. Perkiraan peringkat: <b>#${rank}</b>.`;
  $('rNext').style.display=lv<LV.length?'block':'none';show('sResult')}
 
-function render(){ctx.fillStyle='#9ad7c7';ctx.fillRect(0,0,W,H);if(!G){requestAnimationFrame(loop);return}
+function render(){ctx.fillStyle='#9ad7c7';ctx.fillRect(0,0,W,H);if(!G)return;
  const cx=Math.max(0,Math.min(MW*T-W,G.x-W/2)),cy=Math.max(0,Math.min(MH*T-H,G.y-H/2));ctx.save();ctx.translate(-cx|0,-cy|0);
  const x0=Math.max(0,cx/T|0),x1=Math.min(MW,(cx+W)/T+1|0),y0=Math.max(0,cy/T|0),y1=Math.min(MH,(cy+H)/T+1|0);
  for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const px=x*T,py=y*T;
@@ -209,7 +230,8 @@ function render(){ctx.fillStyle='#9ad7c7';ctx.fillRect(0,0,W,H);if(!G){requestAn
   const dx=tg.x-G.x,dy=tg.y-G.y,dist=Math.hypot(dx,dy);if(dist>120){const a=Math.atan2(dy,dx);ctx.save();ctx.translate(G.x+Math.cos(a)*50,G.y+Math.sin(a)*50);ctx.rotate(a);ctx.fillStyle=G.stage?'#F2545B':'#19B5A5';ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(-6,-9);ctx.lineTo(-6,9);ctx.fill();ctx.restore()}}
  ctx.save();ctx.translate(G.x,G.y);ctx.fillStyle='#0003';ctx.beginPath();ctx.ellipse(0,4,20,10,0,0,7);ctx.fill();drawRider(ctx,P,G.ang);ctx.restore();ctx.restore();
  if(stick){ctx.strokeStyle='#fff8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(stick.ox,stick.oy,60,0,7);ctx.stroke();ctx.fillStyle='#fff8';ctx.beginPath();ctx.arc(stick.ox+stick.dx*60,stick.oy+stick.dy*60,18,0,7);ctx.fill()}}
-let last=0;function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;step(dt);render();requestAnimationFrame(loop)}
-requestAnimationFrame(loop);
+let last=0,raf=0;
+function kick(){if(raf)return;last=performance.now();raf=requestAnimationFrame(loop)}
+function loop(t){raf=0;const dt=Math.min(.05,(t-last)/1000||0);last=t;step(dt);render();if(G&&!G.done)raf=requestAnimationFrame(loop)}
 const lastMail=lsGet('kk_last','');if(lastMail)$('em').value=lastMail;
 </script></body></html>
